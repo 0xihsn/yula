@@ -38,7 +38,7 @@ jailbreaks, and evasion techniques, then generates Markdown and JSON security re
 - **Pluggable detection** — precise per-template matchers blended with a global signal bank via `signals_blend`; `not_contains` and `negative` matchers can veto a positive hit.
 - **Severity-aware exit codes** — exits non-zero when any verdict is `critical`/`high`, suitable for CI/CD gating.
 - **Docker-first workflow** — bundled `Dockerfile` and `docker-compose.yml` mount your config and reports without a local Python install.
-- **Bulk template generation** — single-shot script regenerates the entire 50+ evasion family; an Arc PI Taxonomy attribution helper inserts `info.source*` fields across every YAML.
+
 
 Created by **Ihsan Bilkay (0xIHSN)** • Licensed under [GPL-3.0-or-later](LICENSE)
 
