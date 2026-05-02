@@ -596,7 +596,6 @@ yula-ai-scanner/
 Pull requests, bug reports, and new attack templates are welcome.
 
 - Read [CONTRIBUTING.md](CONTRIBUTING.md) for the dev setup and PR flow.
-- Read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community expectations.
 - Vulnerabilities in YULA itself: see [SECURITY.md](SECURITY.md) for the
   private-disclosure process — don't open a public issue.
 
