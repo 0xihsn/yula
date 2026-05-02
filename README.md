@@ -10,17 +10,6 @@
 ![yula](yula.png)
 
 
-
-
-```
-    ██╗   ██╗██╗   ██╗██╗      █████╗ 
-    ╚██╗ ██╔╝██║   ██║██║     ██╔══██╗
-     ╚████╔╝ ██║   ██║██║     ███████║
-      ╚██╔╝  ██║   ██║██║     ██╔══██║
-       ██║   ╚██████╔╝███████╗██║  ██║
-       ╚═╝    ╚═════╝ ╚══════╝╚═╝  ╚═╝
-```
-
 **YULA AI Scanner** is a production-ready CLI tool for adversarial red-teaming of AI systems.
 It tests LLM endpoints against a comprehensive library of prompt injection attacks,
 jailbreaks, and evasion techniques, then generates Markdown and JSON security reports.
