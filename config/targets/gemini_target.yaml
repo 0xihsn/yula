@@ -1,0 +1,37 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: Google Gemini                                ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Google Gemini via the Generative Language API. Uses the generateContent ║
+# ║  endpoint with API key authentication as a query parameter.              ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Get your API key at: https://aistudio.google.com/apikey
+#
+# Usage: python run.py scan --target config/targets/gemini_target.yaml
+#
+# Required environment variables:
+#   GEMINI_API_KEY — Your Google AI Studio API key
+
+type: gemini
+
+endpoint:
+  # URL template — {model} is automatically replaced with the model value below
+  url: "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+
+  # Available models:
+  #   gemini-2.0-flash (fast, multimodal)
+  #   gemini-1.5-pro (most capable)
+  #   gemini-1.5-flash (fast, cost-effective)
+  #   gemini-1.5-flash-8b (lightweight)
+  model: "gemini-2.0-flash"
+
+  # Optional: inject a system instruction to test your deployed AI application
+  system_prompt: null
+
+  # Maximum output tokens
+  max_tokens: 1024
+
+auth:
+  # Gemini uses the API key as a query parameter (?key=...)
+  type: api_key
+  api_key: "${GEMINI_API_KEY}"

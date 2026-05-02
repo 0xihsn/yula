@@ -1,0 +1,78 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: claude.ai                         ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Drives the Claude.ai web UI via Playwright. Requires a logged-in        ║
+# ║  session cookie — anonymous automation is blocked.                       ║
+# ║                                                                          ║
+# ║  WARNING: Automated red-teaming of Claude.ai may violate Anthropic's     ║
+# ║  Acceptable Use Policy. Use the Anthropic API for authorised testing.    ║
+# ║                                                                          ║
+# ║  WARNING: Selectors are best-effort and break on Anthropic redesigns.    ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# How to capture the session cookie:
+#   1. Log in to https://claude.ai in a regular browser.
+#   2. Open DevTools → Application → Cookies → claude.ai.
+#   3. Copy the value of `sessionKey`.
+#   4. export CLAUDE_WEB_SESSION_KEY="<that value>"
+#
+# Required environment variables:
+#   CLAUDE_WEB_SESSION_KEY — Logged-in claude.ai session key
+
+type: webpage
+
+endpoint:
+  url: "https://claude.ai/new"
+
+  browser:
+    engine: chromium
+    headless: false
+    navigation_wait: networkidle
+    navigation_timeout_ms: 30000
+
+  setup:
+    - { action: wait, selector: "div[contenteditable='true']", state: visible, timeout_ms: 20000 }
+
+  prompt:
+    inputs:
+      - selector: "div[contenteditable='true']"
+        fallback_selectors:
+          - "div.ProseMirror"
+          - "[data-placeholder*='How can']"
+        value: "{prompt}"
+        method: type
+        delay_ms: 5
+
+    submit:
+      method: click
+      selector: "button[aria-label='Send Message']"
+      fallback_selectors:
+        - "button[aria-label*='Send']"
+        - "button[type='submit']"
+
+    wait_for:
+      selector: "div[data-is-streaming='false'].font-claude-message"
+      fallback_selectors:
+        - ".font-claude-message"
+      state: visible
+      timeout_ms: 60000
+      settle_ms: 1500
+
+    extract:
+      selector: "div.font-claude-message:last-of-type"
+      method: inner_text
+      pick: last
+
+    reset:
+      action: reload
+      # Alternative: action: click, selector: "a[href='/new']" for a fresh chat
+      # rather than reloading the current one.
+
+auth:
+  type: cookie
+  cookies:
+    - name: "sessionKey"
+      value: "${CLAUDE_WEB_SESSION_KEY}"
+      domain: ".claude.ai"
+      path: "/"
+      secure: true

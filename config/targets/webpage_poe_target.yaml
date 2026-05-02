@@ -1,0 +1,74 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: poe.com (Quora Poe)               ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Drives the Poe web UI via Playwright. Poe requires a logged-in session  ║
+# ║  cookie (`p-b`) to send any prompt.                                       ║
+# ║                                                                          ║
+# ║  WARNING: Automated red-teaming on Poe may violate their Terms of        ║
+# ║  Service. Confirm authorisation first.                                   ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# How to capture the session cookie:
+#   1. Log in to https://poe.com.
+#   2. DevTools → Application → Cookies → poe.com.
+#   3. Copy the `p-b` cookie value.
+#   4. export POE_SESSION_COOKIE="<that value>"
+#
+# Required environment variables:
+#   POE_SESSION_COOKIE  — `p-b` cookie value
+#   POE_BOT_NAME        — Bot handle to test, e.g. claude-3-5-sonnet, GPT-4o
+
+type: webpage
+
+endpoint:
+  url: "https://poe.com/${POE_BOT_NAME}"
+
+  browser:
+    engine: chromium
+    headless: false
+    navigation_wait: networkidle
+    navigation_timeout_ms: 30000
+
+  setup:
+    - { action: wait, selector: "textarea[class*='ChatMessageInputView_textArea']", state: visible, timeout_ms: 20000 }
+
+  prompt:
+    inputs:
+      - selector: "textarea[class*='ChatMessageInputView_textArea']"
+        fallback_selectors:
+          - "textarea[placeholder*='Talk to']"
+          - "form textarea"
+        value: "{prompt}"
+        method: fill
+
+    submit:
+      method: click
+      selector: "button[class*='ChatMessageSendButton']"
+      fallback_selectors:
+        - "button[type='submit']"
+        - "button[aria-label*='Send']"
+
+    wait_for:
+      selector: "div[class*='Message_botMessageBubble']"
+      fallback_selectors:
+        - "div[class*='ChatMessage_messageRow'][data-author='bot']"
+      state: visible
+      timeout_ms: 60000
+      settle_ms: 2000
+
+    extract:
+      selector: "div[class*='Message_botMessageBubble']:last-of-type"
+      method: inner_text
+      pick: last
+
+    reset:
+      action: reload
+
+auth:
+  type: cookie
+  cookies:
+    - name: "p-b"
+      value: "${POE_SESSION_COOKIE}"
+      domain: ".poe.com"
+      path: "/"
+      secure: true

@@ -1,0 +1,36 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║          YULA AI Scanner — Target: Alibaba DashScope (Qwen)              ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  DashScope exposes Alibaba's Qwen family in two modes — a native API      ║
+# ║  and an OpenAI-compatible "compatible-mode" endpoint. We use the latter. ║
+# ║                                                                          ║
+# ║  Use the international (Singapore) host below or swap in the mainland    ║
+# ║  host:  https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Get your API key at: https://dashscope.console.aliyun.com
+#
+# Usage: python run.py scan --target config/targets/dashscope_target.yaml
+#
+# Required environment variables:
+#   DASHSCOPE_API_KEY — Your DashScope API key (starts with sk-...)
+
+type: openai
+
+endpoint:
+  url: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions"
+
+  # Common Qwen models: qwen-max, qwen-plus, qwen-turbo,
+  #                     qwen2.5-72b-instruct, qwq-32b-preview
+  model: "qwen-plus"
+
+  system_prompt: null
+
+auth:
+  type: api_key
+  api_key: "${DASHSCOPE_API_KEY}"
+
+options:
+  max_tokens: 1024
+  temperature: 0.7
+  extra_headers: {}

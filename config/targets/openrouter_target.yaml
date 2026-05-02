@@ -1,0 +1,40 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: OpenRouter                                   ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  OpenRouter provides a unified API to access 200+ AI models from        ║
+# ║  OpenAI, Anthropic, Google, Meta, Mistral, and many more providers.     ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Get your API key at: https://openrouter.ai/keys
+#
+# Usage: python run.py scan --target config/targets/openrouter_target.yaml
+#
+# Required environment variables:
+#   OPENROUTER_API_KEY — Your OpenRouter API key (starts with sk-or-...)
+
+type: openai
+
+endpoint:
+  url: "https://openrouter.ai/api/v1/chat/completions"
+
+  # Browse all available models at: https://openrouter.ai/models
+  # Examples:
+  #   openai/gpt-4o, anthropic/claude-3.5-sonnet
+  #   google/gemini-pro-1.5, meta-llama/llama-3.3-70b-instruct
+  #   mistralai/mistral-large, deepseek/deepseek-chat
+  model: "meta-llama/llama-3.3-70b-instruct"
+
+  # Optional: inject a system prompt to test your deployed AI application
+  system_prompt: null
+
+auth:
+  type: api_key
+  api_key: "${OPENROUTER_API_KEY}"
+
+options:
+  max_tokens: 1024
+  temperature: 0.7
+  # OpenRouter allows specifying your app name for usage tracking (optional)
+  extra_headers:
+    HTTP-Referer: "https://github.com/yula-ai/yula-ai-scanner"
+    X-Title: "YULA AI Scanner"

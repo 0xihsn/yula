@@ -1,0 +1,46 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║          YULA AI Scanner — Target: Cloudflare Workers AI                 ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Cloudflare's Workers AI inference REST API has its own request shape    ║
+# ║  per model. Most chat models accept { "messages": [{role, content}] }    ║
+# ║  and return { "result": { "response": "..." } }.                          ║
+# ║                                                                          ║
+# ║  Cloudflare ALSO ships an OpenAI-compatible endpoint at                  ║
+# ║    https://api.cloudflare.com/client/v4/accounts/<id>/ai/v1/chat/completions
+# ║  Point a copy of openai_target.yaml there if you'd rather use that.      ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Get your account ID and API token at: https://dash.cloudflare.com
+#
+# Usage: python run.py scan --target config/targets/cloudflare_workers_ai_target.yaml
+#
+# Required environment variables:
+#   CLOUDFLARE_ACCOUNT_ID — Your Cloudflare account ID (32 hex chars)
+#   CLOUDFLARE_API_TOKEN  — A token with the Workers AI Run permission
+
+type: custom_api
+
+endpoint:
+  url: "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/meta/llama-3.1-70b-instruct"
+
+  method: POST
+
+  body_template: |
+    {
+      "messages": [
+        {"role": "user", "content": "{prompt}"}
+      ],
+      "max_tokens": 512,
+      "temperature": 0.7
+    }
+
+  response_path: "result.response"
+
+  content_type: "application/json"
+
+auth:
+  type: bearer
+  token: "${CLOUDFLARE_API_TOKEN}"
+
+options:
+  extra_headers: {}

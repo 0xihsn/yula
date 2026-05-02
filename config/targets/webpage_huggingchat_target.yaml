@@ -1,0 +1,70 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: huggingface.co/chat (HuggingChat) ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Drives the HuggingChat web UI via Playwright. Public chat works         ║
+# ║  anonymously; logged-in chat requires the `hf-chat` session cookie.      ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Optional: capture the `hf-chat` cookie from a logged-in session.
+#
+# Required environment variables (logged-in mode):
+#   HF_CHAT_SESSION — `hf-chat` cookie value
+
+type: webpage
+
+endpoint:
+  url: "https://huggingface.co/chat/"
+
+  browser:
+    engine: chromium
+    headless: true
+    navigation_wait: networkidle
+    navigation_timeout_ms: 20000
+
+  setup:
+    - { action: click, selector: "button:has-text('Accept')", optional: true }
+    - { action: wait, selector: "textarea[placeholder*='Ask anything']", state: visible, timeout_ms: 15000 }
+
+  prompt:
+    inputs:
+      - selector: "textarea[placeholder*='Ask anything']"
+        fallback_selectors:
+          - "textarea[enterkeyhint='enter']"
+          - "form textarea"
+        value: "{prompt}"
+        method: fill
+
+    submit:
+      method: click
+      selector: "button[type='submit'][aria-label*='Send']"
+      fallback_selectors:
+        - "button[type='submit']"
+
+    wait_for:
+      selector: "div[role='presentation'] .prose"
+      fallback_selectors:
+        - ".message.from-assistant"
+        - ".prose"
+      state: visible
+      timeout_ms: 60000
+      settle_ms: 1500
+
+    extract:
+      selector: ".prose:last-of-type"
+      method: inner_text
+      pick: last
+
+    reset:
+      action: click
+      selector: "a[href='/chat/']"
+      fallback_selectors:
+        - "a:has-text('New Chat')"
+
+auth:
+  type: cookie
+  cookies:
+    - name: "hf-chat"
+      value: "${HF_CHAT_SESSION}"
+      domain: ".huggingface.co"
+      path: "/"
+      secure: true

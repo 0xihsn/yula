@@ -1,0 +1,66 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: chat.mistral.ai (Le Chat)         ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Drives the Mistral Le Chat web UI via Playwright. Requires a logged-in  ║
+# ║  session — capture cookies from a signed-in browser.                     ║
+# ║                                                                          ║
+# ║  For programmatic testing, prefer the Mistral API (mistral_target.yaml). ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Required environment variables:
+#   LECHAT_SESSION — Le Chat session cookie value (`__Secure-next-auth.session-token`)
+
+type: webpage
+
+endpoint:
+  url: "https://chat.mistral.ai/chat"
+
+  browser:
+    engine: chromium
+    headless: false
+    navigation_wait: networkidle
+    navigation_timeout_ms: 30000
+
+  setup:
+    - { action: click, selector: "button:has-text('Accept')", optional: true }
+    - { action: wait, selector: "textarea[placeholder*='Ask le Chat'], textarea", state: visible, timeout_ms: 20000 }
+
+  prompt:
+    inputs:
+      - selector: "textarea[placeholder*='Ask le Chat']"
+        fallback_selectors:
+          - "form textarea"
+          - "textarea"
+        value: "{prompt}"
+        method: fill
+
+    submit:
+      method: click
+      selector: "button[aria-label='Send']"
+      fallback_selectors:
+        - "button[type='submit']"
+
+    wait_for:
+      selector: "div[data-message-role='assistant']"
+      fallback_selectors:
+        - "div.assistant-message"
+      state: visible
+      timeout_ms: 60000
+      settle_ms: 1500
+
+    extract:
+      selector: "div[data-message-role='assistant']:last-of-type"
+      method: inner_text
+      pick: last
+
+    reset:
+      action: reload
+
+auth:
+  type: cookie
+  cookies:
+    - name: "__Secure-next-auth.session-token"
+      value: "${LECHAT_SESSION}"
+      domain: ".chat.mistral.ai"
+      path: "/"
+      secure: true

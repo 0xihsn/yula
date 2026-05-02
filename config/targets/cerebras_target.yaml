@@ -1,0 +1,32 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: Cerebras Inference                ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Cerebras runs open-weight models on their wafer-scale hardware behind   ║
+# ║  an OpenAI-compatible API. Useful for fast smoke-testing.                ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Get your API key at: https://cloud.cerebras.ai
+#
+# Usage: python run.py scan --target config/targets/cerebras_target.yaml
+#
+# Required environment variables:
+#   CEREBRAS_API_KEY — Your Cerebras API key (starts with csk-...)
+
+type: openai
+
+endpoint:
+  url: "https://api.cerebras.ai/v1/chat/completions"
+
+  # Available models: llama3.1-8b, llama3.1-70b, llama-3.3-70b
+  model: "llama-3.3-70b"
+
+  system_prompt: null
+
+auth:
+  type: api_key
+  api_key: "${CEREBRAS_API_KEY}"
+
+options:
+  max_tokens: 1024
+  temperature: 0.7
+  extra_headers: {}

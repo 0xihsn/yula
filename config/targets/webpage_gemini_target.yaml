@@ -1,0 +1,82 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: gemini.google.com                 ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Drives the Gemini web UI via Playwright. Google's auth flow is         ║
+# ║  multi-step and rate-limits anonymous browsers — you'll need a fully     ║
+# ║  signed-in browser profile or a captured cookie set.                     ║
+# ║                                                                          ║
+# ║  For programmatic testing, prefer the Vertex AI / generativelanguage     ║
+# ║  API endpoints (gemini_target.yaml or vertexai_target.yaml).             ║
+# ║                                                                          ║
+# ║  WARNING: Selectors are best-effort and may break.                       ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# To use a logged-in profile, capture cookies from a signed-in browser. Google
+# uses several cookies — at minimum SID, HSID, SSID, APISID, SAPISID, __Secure-1PSID,
+# __Secure-1PSIDTS, __Secure-1PSIDCC. Export them all to env vars listed below.
+#
+# Required environment variables:
+#   GOOGLE_SID, GOOGLE_HSID, GOOGLE_SSID, GOOGLE_APISID, GOOGLE_SAPISID,
+#   GOOGLE_1PSID, GOOGLE_1PSIDTS, GOOGLE_1PSIDCC
+
+type: webpage
+
+endpoint:
+  url: "https://gemini.google.com/app"
+
+  browser:
+    engine: chromium
+    headless: false
+    navigation_wait: networkidle
+    navigation_timeout_ms: 45000
+
+  setup:
+    - { action: wait, selector: "rich-textarea, div[contenteditable='true']", state: visible, timeout_ms: 30000 }
+
+  prompt:
+    inputs:
+      - selector: "rich-textarea div[contenteditable='true']"
+        fallback_selectors:
+          - "div[contenteditable='true']"
+          - "textarea"
+        value: "{prompt}"
+        method: type
+        delay_ms: 5
+
+    submit:
+      method: click
+      selector: "button[aria-label='Send message']"
+      fallback_selectors:
+        - "button.send-button"
+        - "button[mat-icon-button][aria-label*='Send']"
+
+    wait_for:
+      selector: "model-response, .model-response-text"
+      fallback_selectors:
+        - "message-content"
+      state: visible
+      timeout_ms: 60000
+      settle_ms: 2000
+
+    extract:
+      selector: "model-response:last-of-type"
+      fallback_selectors:
+        - ".model-response-text:last-of-type"
+        - "message-content:last-of-type"
+      method: inner_text
+      pick: last
+
+    reset:
+      action: reload
+
+auth:
+  type: cookie
+  cookies:
+    - { name: "SID",                   value: "${GOOGLE_SID}",       domain: ".google.com", path: "/", secure: true }
+    - { name: "HSID",                  value: "${GOOGLE_HSID}",      domain: ".google.com", path: "/", secure: true }
+    - { name: "SSID",                  value: "${GOOGLE_SSID}",      domain: ".google.com", path: "/", secure: true }
+    - { name: "APISID",                value: "${GOOGLE_APISID}",    domain: ".google.com", path: "/", secure: true }
+    - { name: "SAPISID",               value: "${GOOGLE_SAPISID}",   domain: ".google.com", path: "/", secure: true }
+    - { name: "__Secure-1PSID",        value: "${GOOGLE_1PSID}",     domain: ".google.com", path: "/", secure: true }
+    - { name: "__Secure-1PSIDTS",      value: "${GOOGLE_1PSIDTS}",   domain: ".google.com", path: "/", secure: true }
+    - { name: "__Secure-1PSIDCC",      value: "${GOOGLE_1PSIDCC}",   domain: ".google.com", path: "/", secure: true }

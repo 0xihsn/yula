@@ -1,0 +1,82 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: chat.openai.com (ChatGPT)         ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Drives the ChatGPT web UI via Playwright. ChatGPT requires a logged-in  ║
+# ║  session — Cloudflare's bot challenge will reject anonymous automation,  ║
+# ║  so you MUST inject a valid `__Secure-next-auth.session-token` cookie.   ║
+# ║                                                                          ║
+# ║  WARNING: Using ChatGPT for automated security testing may violate       ║
+# ║  OpenAI's Terms of Service. Confirm authorisation before scanning.       ║
+# ║                                                                          ║
+# ║  WARNING: Selectors here are best-effort — chat.openai.com redesigns     ║
+# ║  frequently. If the scan fails to find the input, open DevTools, copy a  ║
+# ║  fresh selector, and update the YAML. See docs/target_types.md.          ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# How to capture the session cookie:
+#   1. Log in to https://chat.openai.com in a regular browser.
+#   2. Open DevTools → Application → Cookies → chat.openai.com.
+#   3. Copy the value of `__Secure-next-auth.session-token`.
+#   4. export OPENAI_WEB_SESSION_TOKEN="<that value>"
+#
+# Required environment variables:
+#   OPENAI_WEB_SESSION_TOKEN — Logged-in session cookie value
+
+type: webpage
+
+endpoint:
+  url: "https://chat.openai.com/"
+
+  browser:
+    engine: chromium
+    headless: false               # ChatGPT often blocks headless; run headed
+    navigation_wait: networkidle
+    navigation_timeout_ms: 30000
+
+  setup:
+    # Dismiss any overlays / modals that appear on first load.
+    - { action: click, selector: "button:has-text('Stay logged out')", optional: true }
+    - { action: click, selector: "button[aria-label='Close']", optional: true }
+    - { action: wait, selector: "textarea[id^='prompt-textarea'], div[contenteditable='true']", state: visible, timeout_ms: 20000 }
+
+  prompt:
+    inputs:
+      - selector: "div#prompt-textarea[contenteditable='true']"
+        fallback_selectors:
+          - "textarea[id^='prompt-textarea']"
+          - "div[contenteditable='true']"
+        value: "{prompt}"
+        method: type
+        delay_ms: 5
+
+    submit:
+      method: click
+      selector: "button[data-testid='send-button']"
+      fallback_selectors:
+        - "button[aria-label*='Send']"
+
+    wait_for:
+      selector: "[data-message-author-role='assistant']"
+      state: visible
+      timeout_ms: 60000
+      settle_ms: 1500
+
+    extract:
+      selector: "[data-message-author-role='assistant']:last-of-type"
+      method: inner_text
+      pick: last
+
+    reset:
+      action: click
+      selector: "a[data-testid='create-new-chat-button']"
+      fallback_selectors:
+        - "button[aria-label='New chat']"
+
+auth:
+  type: cookie
+  cookies:
+    - name: "__Secure-next-auth.session-token"
+      value: "${OPENAI_WEB_SESSION_TOKEN}"
+      domain: ".chat.openai.com"
+      path: "/"
+      secure: true

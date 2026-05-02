@@ -1,0 +1,34 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: Ollama (Local)                               ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Ollama runs LLMs locally and exposes an OpenAI-compatible API at        ║
+# ║  localhost:11434. No API key is required for local servers.              ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Prerequisites:
+#   1. Install Ollama: https://ollama.ai
+#   2. Pull a model: ollama pull llama3.2
+#   3. Start server: ollama serve (starts automatically on macOS/Windows)
+#
+# Usage: python run.py scan --target config/targets/ollama_target.yaml
+
+type: openai
+
+endpoint:
+  url: "http://localhost:11434/v1/chat/completions"
+
+  # Model to test — must be pulled first with `ollama pull <model>`
+  # Popular models: llama3.2, llama3.1, mistral, gemma2, phi3, qwen2.5
+  model: "qwen2.5-coder:7b"
+
+  # Optional: inject a system prompt to simulate a deployed AI application
+  system_prompt: "Answer alywas with no only"
+
+auth:
+  # Ollama does not require authentication for local access
+  type: none
+
+options:
+  max_tokens: 1024
+  temperature: 0.7
+  extra_headers: {}

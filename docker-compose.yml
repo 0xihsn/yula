@@ -1,0 +1,38 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# YULA AI Scanner — Docker Compose
+#
+# Quick start:
+#   docker compose run --rm yula-ai-scanner scan --target config/targets/openai_target.yaml
+#   docker compose run --rm yula-ai-scanner scan --target config/targets/ollama_target.yaml
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  yula-ai-scanner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: yula-ai-scanner
+    volumes:
+      # Mount output so reports appear on the host after the container exits
+      - ./output:/app/output
+      # Mount config so you can edit scan.yaml and target files without rebuilding
+      - ./config:/app/config:ro
+    env_file:
+      # Create a .env file with OPENAI_API_KEY, ANTHROPIC_API_KEY, etc.
+      - path: .env
+        required: false
+    # Override with: docker compose run --rm yula-ai-scanner scan --target config/targets/openai_target.yaml
+    command: ["--help"]
+
+  yula-ai-scanner-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: yula-ai-scanner-tests
+    entrypoint: ["python", "-m", "pytest"]
+    command: ["tests/", "-v"]
+    env_file:
+      - path: .env
+        required: false

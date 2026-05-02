@@ -1,0 +1,33 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: Moonshot AI (Kimi)                ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Moonshot exposes Kimi (and Kimi K2) through an OpenAI-compatible API.   ║
+# ║  Use api.moonshot.cn for mainland China access or api.moonshot.ai for    ║
+# ║  the international endpoint.                                             ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Get your API key at: https://platform.moonshot.cn  (or .ai for international)
+#
+# Usage: python run.py scan --target config/targets/moonshot_target.yaml
+#
+# Required environment variables:
+#   MOONSHOT_API_KEY — Your Moonshot API key (starts with sk-...)
+
+type: openai
+
+endpoint:
+  url: "https://api.moonshot.cn/v1/chat/completions"
+
+  # Available: moonshot-v1-8k, moonshot-v1-32k, moonshot-v1-128k, kimi-k2-0711-preview
+  model: "moonshot-v1-32k"
+
+  system_prompt: null
+
+auth:
+  type: api_key
+  api_key: "${MOONSHOT_API_KEY}"
+
+options:
+  max_tokens: 1024
+  temperature: 0.7
+  extra_headers: {}

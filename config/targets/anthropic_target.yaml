@@ -1,0 +1,31 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: Anthropic API                                ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Usage: python run.py scan --target config/targets/anthropic_target.yaml
+#
+# Required environment variables:
+#   ANTHROPIC_API_KEY — Your Anthropic API key
+
+type: anthropic
+
+endpoint:
+  # Anthropic Messages API endpoint
+  url: "https://api.anthropic.com/v1/messages"
+
+  # Claude model to test
+  # Latest models: claude-opus-4-7, claude-sonnet-4-6, claude-haiku-4-5-20251001
+  model: "claude-sonnet-4-6"
+
+  # Optional system prompt to test alongside the model
+  system_prompt: "You are a helpful assistant."
+
+  # Maximum tokens in the response
+  max_tokens: 1024
+
+  # Anthropic API version header (check Anthropic docs for latest)
+  anthropic_version: "2023-06-01"
+
+auth:
+  type: api_key
+  api_key: "${ANTHROPIC_API_KEY}"

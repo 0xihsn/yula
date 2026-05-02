@@ -1,0 +1,80 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║         YULA AI Scanner — Target: Web Page with Multi-Step Login         ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Demonstrates a richer login flow than the built-in `auth.type=form_login`:
+#   1. Navigate to /login
+#   2. Fill username + password
+#   3. Click submit and wait for redirect
+#   4. Extract a CSRF token from the dashboard
+#   5. Drive the chat UI with the captured token sent in a hidden field
+#
+# This is the recommended pattern when:
+#   - The login page has hidden CSRF / nonce fields
+#   - Login requires more than one page (e.g. SSO redirects)
+#   - The chat form expects a per-session token alongside the prompt
+#
+# Set credentials in your environment before running:
+#   export APP_USERNAME=...
+#   export APP_PASSWORD=...
+
+type: webpage
+
+endpoint:
+  url: "http://localhost:3000/chat"
+
+  browser:
+    engine: chromium
+    headless: true
+    navigation_wait: networkidle
+
+  setup:
+    # Step 1 — go to the login page.
+    - { action: navigate, url: "http://localhost:3000/login", timeout_ms: 10000 }
+
+    # Step 2 — fill credentials. ${ENV_VAR} interpolation runs at config load
+    # time, so the rendered values land here as plain strings.
+    - { action: fill, selector: "#username", value: "${APP_USERNAME}" }
+    - { action: fill, selector: "#password", value: "${APP_PASSWORD}" }
+
+    # Step 3 — submit and wait for the post-login dashboard.
+    - { action: click, selector: "button[type=submit]" }
+    - { action: wait,  selector: ".dashboard", state: visible, timeout_ms: 10000 }
+
+    # Step 4 — navigate to chat and capture the CSRF token from a hidden input.
+    - { action: navigate, url: "http://localhost:3000/chat" }
+    - { action: extract,
+        selector: "input[name=csrf_token]",
+        extract_method: attribute,
+        attribute: value,
+        store_as: csrf }
+
+  prompt:
+    inputs:
+      # The hidden CSRF field is re-rendered server-side per page load; we
+      # re-stamp it from the captured `{csrf}` variable to be safe.
+      - { selector: "input[name=csrf_token]", value: "{csrf}" }
+      - { selector: "#chat-input", value: "{prompt}" }
+
+    submit:
+      method: click
+      selector: "#send-btn"
+
+    wait_for:
+      selector: ".message.assistant"
+      state: visible
+      timeout_ms: 10000
+      settle_ms: 500
+
+    extract:
+      method: inner_text
+      pick: last
+
+    reset:
+      action: click
+      selector: ".clear-chat"
+
+auth:
+  # `auth.type=none` here — the multi-step login lives in `endpoint.setup`
+  # because it needs hidden-field extraction beyond what form_login supports.
+  type: none

@@ -1,0 +1,46 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: OpenAI-Compatible API                        ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Works with: OpenAI API, vLLM, Ollama, LM Studio, llama.cpp server,     ║
+# ║  Together AI, Groq, Mistral, Azure OpenAI, and any service implementing  ║
+# ║  the /v1/chat/completions specification.                                 ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Usage: python run.py scan --target config/targets/openai_target.yaml
+#
+# Required environment variables:
+#   OPENAI_API_KEY   — Your OpenAI API key (or equivalent for other services)
+#
+# For local servers (Ollama, vLLM, LM Studio), set api_key to any non-empty
+# string since local servers typically don't validate it.
+
+type: openai
+
+endpoint:
+  # Full URL to the chat completions endpoint
+  url: "http://localhost:8080/v1/chat/completions"
+
+  # Model to test. Use the model ID your service accepts.
+  # Examples: "gpt-4o", "gpt-3.5-turbo", "llama3", "mistral-7b-instruct"
+  model: "gpt-4o"
+
+  # Optional: inject a system prompt to test your deployed AI application
+  # Leave null to test the model without a system prompt
+  system_prompt: "You are a helpful customer service assistant for Acme Corp."
+
+auth:
+  # Authentication type: api_key | bearer | basic | cookie | none
+  type: api_key
+
+  # Your API key — stored as an environment variable, not hardcoded here
+  api_key: "${OPENAI_API_KEY}"
+
+options:
+  # Maximum tokens the model should generate in its response
+  max_tokens: 1024
+
+  # Sampling temperature (lower = more deterministic responses)
+  temperature: 0.7
+
+  # Additional HTTP headers to include in every request
+  extra_headers: {}

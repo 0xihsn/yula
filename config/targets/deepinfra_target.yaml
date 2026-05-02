@@ -1,0 +1,34 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: DeepInfra                         ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  DeepInfra hosts open-weight models behind both their native API and    ║
+# ║  a fully OpenAI-compatible /v1/openai/chat/completions endpoint.         ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Get your API key at: https://deepinfra.com/dash/api_keys
+#
+# Usage: python run.py scan --target config/targets/deepinfra_target.yaml
+#
+# Required environment variables:
+#   DEEPINFRA_API_KEY — Your DeepInfra API token
+
+type: openai
+
+endpoint:
+  url: "https://api.deepinfra.com/v1/openai/chat/completions"
+
+  # Browse the catalog at https://deepinfra.com/models
+  # Examples: meta-llama/Meta-Llama-3.1-70B-Instruct,
+  #           Qwen/Qwen2.5-72B-Instruct, deepseek-ai/DeepSeek-V3
+  model: "meta-llama/Meta-Llama-3.1-70B-Instruct"
+
+  system_prompt: null
+
+auth:
+  type: api_key
+  api_key: "${DEEPINFRA_API_KEY}"
+
+options:
+  max_tokens: 1024
+  temperature: 0.7
+  extra_headers: {}

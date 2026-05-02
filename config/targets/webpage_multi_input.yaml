@@ -1,0 +1,92 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║      YULA AI Scanner — Target: Web Page with Multi-Field Form           ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Demonstrates a chat UI whose form needs more than just a prompt:
+#   - A persona / role dropdown
+#   - A hidden conversation_id field set per session
+#   - A custom extraction (the response is in a `data-content` attribute,
+#     not the visible text), with a regex to strip a "Bot:" prefix
+#   - Fallback selectors in case the UI version changes class names
+#
+# This is the recommended pattern when:
+#   - The form has more than one input that affects the response
+#   - The visible text is not the canonical reply (e.g. it's truncated)
+#   - You want resilience against minor UI revs without forking configs
+
+type: webpage
+
+endpoint:
+  url: "http://localhost:3000/chat-advanced"
+
+  browser:
+    engine: chromium
+    headless: true
+    viewport: { width: 1440, height: 900 }
+    extra_http_headers:
+      X-Test-Run: "yula-multi-input"
+
+  setup:
+    - { action: wait, selector: "#chat-form", state: visible, timeout_ms: 10000 }
+    # Generate a stable conversation id once and reuse it across all payloads.
+    - { action: evaluate,
+        script: "() => crypto.randomUUID()",
+        store_as: conversation_id }
+
+  prompt:
+    before:
+      # Some apps require a fresh conversation per payload — the optional
+      # click is a no-op if the button is missing on this page version.
+      - { action: click, selector: "#new-conversation", optional: true }
+
+    inputs:
+      # Persona dropdown. `fill` works on <select> by typing the option label;
+      # use evaluate if you need to set a specific value="...".
+      - { selector: "select[name=persona]", value: "developer" }
+
+      # Hidden field stamped with the conversation id from setup.
+      - { selector: "input[name=conversation_id]", value: "{conversation_id}" }
+
+      # Main prompt input — try the new class name first, fall back to the old.
+      - selector: "textarea.prompt-input"
+        fallback_selectors:
+          - "textarea#message"
+          - "textarea[name=message]"
+        value: "{prompt}"
+        method: fill
+
+    submit:
+      method: click
+      selector: "button[data-test=send]"
+      fallback_selectors: ["button[type=submit]"]
+
+    wait_for:
+      # Wait until at least one assistant bubble is in the DOM.
+      selector: ".message[data-role=assistant]"
+      state: attached
+      timeout_ms: 12000
+      settle_ms: 750
+
+    extract:
+      # The canonical reply is stored in the `data-content` attribute (the
+      # visible text is HTML-escaped and truncated for display).
+      selector: ".message[data-role=assistant]"
+      method: attribute
+      attribute: "data-content"
+      pick: last
+      # Strip an optional "Bot:" / "Assistant:" prefix the app sometimes adds.
+      regex: "^(?:Bot|Assistant):\\s*(.*)$"
+      regex_group: 1
+
+    reset:
+      # Reload the page to guarantee a clean conversation between payloads.
+      action: reload
+
+auth:
+  type: cookie
+  cookies:
+    - name: "session_token"
+      value: "${SESSION_TOKEN}"
+      domain: "localhost"
+      path: "/"
+      secure: false

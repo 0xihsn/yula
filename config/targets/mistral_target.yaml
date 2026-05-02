@@ -1,0 +1,33 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: Mistral AI                                   ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Mistral AI's cloud API with OpenAI-compatible endpoints.                ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Get your API key at: https://console.mistral.ai
+#
+# Usage: python run.py scan --target config/targets/mistral_target.yaml
+#
+# Required environment variables:
+#   MISTRAL_API_KEY — Your Mistral API key
+
+type: openai
+
+endpoint:
+  url: "https://api.mistral.ai/v1/chat/completions"
+
+  # Available models: mistral-large-latest, mistral-small-latest,
+  #                   open-mistral-nemo, codestral-latest, open-codestral-mamba
+  model: "mistral-large-latest"
+
+  # Optional: inject a system prompt to test your deployed AI application
+  system_prompt: null
+
+auth:
+  type: api_key
+  api_key: "${MISTRAL_API_KEY}"
+
+options:
+  max_tokens: 1024
+  temperature: 0.7
+  extra_headers: {}

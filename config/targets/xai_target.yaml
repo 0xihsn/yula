@@ -1,0 +1,33 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: xAI (Grok)                        ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  xAI exposes Grok via an OpenAI-compatible /v1/chat/completions API.     ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Get your API key at: https://console.x.ai
+#
+# Usage: python run.py scan --target config/targets/xai_target.yaml
+#
+# Required environment variables:
+#   XAI_API_KEY — Your xAI API key (starts with xai-...)
+
+type: openai
+
+endpoint:
+  url: "https://api.x.ai/v1/chat/completions"
+
+  # Available models (as of 2026-05): grok-2-latest, grok-2-vision-latest,
+  # grok-3-latest, grok-3-mini. Check https://docs.x.ai for current list.
+  model: "grok-2-latest"
+
+  # Optional: inject a system prompt to test your deployed AI application
+  system_prompt: null
+
+auth:
+  type: api_key
+  api_key: "${XAI_API_KEY}"
+
+options:
+  max_tokens: 1024
+  temperature: 0.7
+  extra_headers: {}

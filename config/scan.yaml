@@ -1,0 +1,50 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║                  YULA AI Scanner — Scan Configuration                   ║
+# ║  Edit this file to control how scans run.                               ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# All paths are relative to the project root directory (where run.py lives).
+# Secrets should NOT be stored here — use environment variables or a .env file.
+# Reference them as ${MY_ENV_VAR} in any string value below.
+#
+# Attack templates are loaded automatically from templates/ — no
+# configuration needed. Add or remove .yaml files there to control coverage.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Scan runtime settings
+# ─────────────────────────────────────────────────────────────────────────────
+scan:
+  # How much detail to show in the live UI and write to the report
+  #   public       — pass/fail counts only (safe to share externally)
+  #   internal     — categories, signals, recommendations (for internal teams)
+  #   confidential — full payloads + full AI responses (for security auditors)
+  visibility: internal
+
+  # Maximum total payloads to send. null = unlimited (runs all template payloads).
+  # Recommended: set to 100-500 for a quick scan, null for full coverage.
+  max_payloads: null
+
+  # Maximum number of requests in flight at the same time
+  concurrency: 5
+
+  # Token bucket rate limit — requests per minute across all concurrent workers
+  requests_per_minute: 60
+
+  # Per-request timeout in seconds (increase for slow local models)
+  timeout_seconds: 30
+
+  # Number of retries on transient errors (network timeouts, 5xx responses)
+  max_retries: 3
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Output settings
+# ─────────────────────────────────────────────────────────────────────────────
+output:
+  # Path for the generated Markdown security report
+  report_path: "output/report.md"
+
+  # JSON-structured log file path. Set to null to disable file logging.
+  log_file: "output/yula-ai-scanner.log"
+
+  # Console log verbosity: DEBUG | INFO | WARNING | ERROR
+  log_level: INFO

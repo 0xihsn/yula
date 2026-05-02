@@ -1,0 +1,47 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: Google Vertex AI                  ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Vertex AI's REST endpoints require a short-lived OAuth2 access token    ║
+# ║  (NOT a long-lived API key). YULA does NOT mint these natively, but      ║
+# ║  Google ships an OpenAI-compatible Vertex endpoint that accepts a        ║
+# ║  bearer token printed by `gcloud`.                                       ║
+# ║                                                                          ║
+# ║  Workflow:                                                               ║
+# ║   1.  gcloud auth application-default login                              ║
+# ║   2.  export VERTEX_TOKEN="$(gcloud auth print-access-token)"            ║
+# ║   3.  python run.py scan --target config/targets/vertexai_target.yaml    ║
+# ║                                                                          ║
+# ║  Tokens expire after ~1 hour — re-export before long scans.              ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Docs: https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/call-vertex-using-openai-library
+#
+# Required environment variables:
+#   VERTEX_TOKEN     — Output of `gcloud auth print-access-token`
+#   VERTEX_PROJECT   — Your GCP project ID
+#   VERTEX_LOCATION  — A region such as us-central1, europe-west4, asia-northeast1
+
+type: openai
+
+endpoint:
+  # Anthropic / Llama / Gemini all live behind this endpoint when accessed
+  # via the OpenAI compat shim. Replace the {model} segment in `model:` below
+  # with whatever publisher/model pair you want to scan.
+  url: "https://${VERTEX_LOCATION}-aiplatform.googleapis.com/v1/projects/${VERTEX_PROJECT}/locations/${VERTEX_LOCATION}/endpoints/openapi/chat/completions"
+
+  # Examples:
+  #   google/gemini-2.0-flash
+  #   meta/llama-3.3-70b-instruct-maas
+  #   anthropic/claude-3-5-sonnet-v2@20241022
+  model: "google/gemini-2.0-flash"
+
+  system_prompt: null
+
+auth:
+  type: bearer
+  token: "${VERTEX_TOKEN}"
+
+options:
+  max_tokens: 1024
+  temperature: 0.7
+  extra_headers: {}

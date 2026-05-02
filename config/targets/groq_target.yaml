@@ -1,0 +1,34 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: Groq Cloud                                   ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Groq provides ultra-fast inference for open-source models using their   ║
+# ║  LPU hardware. Fully OpenAI-compatible API.                              ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Get your API key at: https://console.groq.com
+#
+# Usage: python run.py scan --target config/targets/groq_target.yaml
+#
+# Required environment variables:
+#   GROQ_API_KEY — Your Groq API key (starts with gsk_...)
+
+type: openai
+
+endpoint:
+  url: "https://api.groq.com/openai/v1/chat/completions"
+
+  # Available models: llama-3.3-70b-versatile, llama-3.1-8b-instant,
+  #                   mixtral-8x7b-32768, gemma2-9b-it, llama-guard-3-8b
+  model: "llama-3.3-70b-versatile"
+
+  # Optional: inject a system prompt to test your deployed AI application
+  system_prompt: null
+
+auth:
+  type: api_key
+  api_key: "${GROQ_API_KEY}"
+
+options:
+  max_tokens: 1024
+  temperature: 0.7
+  extra_headers: {}

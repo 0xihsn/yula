@@ -1,0 +1,34 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: LM Studio (Local)                            ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  LM Studio provides a local OpenAI-compatible server at port 1234.      ║
+# ║  Load a model in LM Studio's "Local Server" tab then use this target.   ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Prerequisites:
+#   1. Download LM Studio: https://lmstudio.ai
+#   2. Download a model via the Discover tab
+#   3. Go to Local Server tab and click "Start Server"
+#
+# Usage: python run.py scan --target config/targets/lmstudio_target.yaml
+
+type: openai
+
+endpoint:
+  url: "http://localhost:1234/v1/chat/completions"
+
+  # Model identifier shown in LM Studio's server tab (e.g., the filename or alias)
+  # Examples: "lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF"
+  model: "local-model"
+
+  # Optional: inject a system prompt to simulate a deployed AI application
+  system_prompt: null
+
+auth:
+  # LM Studio local server does not require authentication
+  type: none
+
+options:
+  max_tokens: 1024
+  temperature: 0.7
+  extra_headers: {}

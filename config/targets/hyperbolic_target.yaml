@@ -1,0 +1,33 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: Hyperbolic                        ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Hyperbolic serves open-weight models behind an OpenAI-compatible API.   ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Get your API key at: https://app.hyperbolic.xyz/settings
+#
+# Usage: python run.py scan --target config/targets/hyperbolic_target.yaml
+#
+# Required environment variables:
+#   HYPERBOLIC_API_KEY — Your Hyperbolic API key
+
+type: openai
+
+endpoint:
+  url: "https://api.hyperbolic.xyz/v1/chat/completions"
+
+  # Browse models at https://app.hyperbolic.xyz/models
+  # Examples: meta-llama/Meta-Llama-3.1-70B-Instruct,
+  #           Qwen/Qwen2.5-72B-Instruct, deepseek-ai/DeepSeek-V3
+  model: "meta-llama/Meta-Llama-3.1-70B-Instruct"
+
+  system_prompt: null
+
+auth:
+  type: api_key
+  api_key: "${HYPERBOLIC_API_KEY}"
+
+options:
+  max_tokens: 1024
+  temperature: 0.7
+  extra_headers: {}

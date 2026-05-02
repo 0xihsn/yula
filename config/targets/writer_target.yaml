@@ -1,0 +1,46 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: Writer (Palmyra)                  ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Writer's enterprise LLM API serves the Palmyra family behind an         ║
+# ║  org-scoped chat endpoint.                                               ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Get your API key at: https://app.writer.com (Developer Portal → API Keys)
+#
+# Usage: python run.py scan --target config/targets/writer_target.yaml
+#
+# Required environment variables:
+#   WRITER_API_KEY — Your Writer API key
+#   WRITER_ORG_ID  — Your numeric Writer organisation ID
+#
+# NOTE: replace <model-id> in the URL with the model you want to scan
+# (e.g. palmyra-x4, palmyra-x-004, palmyra-med).
+
+type: custom_api
+
+endpoint:
+  url: "https://api.writer.com/v1/chat"
+
+  method: POST
+
+  body_template: |
+    {
+      "model": "palmyra-x4",
+      "messages": [
+        {"role": "user", "content": "{prompt}"}
+      ],
+      "max_tokens": 512,
+      "temperature": 0.7,
+      "stream": false
+    }
+
+  response_path: "choices.0.message.content"
+
+  content_type: "application/json"
+
+auth:
+  type: bearer
+  token: "${WRITER_API_KEY}"
+
+options:
+  extra_headers: {}

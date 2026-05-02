@@ -1,0 +1,69 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: copilot.microsoft.com             ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Drives the Microsoft Copilot consumer web UI via Playwright. Anonymous  ║
+# ║  use is allowed for limited prompts; logged-in use requires Microsoft    ║
+# ║  account cookies.                                                        ║
+# ║                                                                          ║
+# ║  WARNING: Selectors break on UI redesigns.                               ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Optional: capture an MSAL session cookie for the logged-in experience.
+#
+# Required environment variables (logged-in mode):
+#   COPILOT_SESSION — Microsoft account session cookie value (optional)
+
+type: webpage
+
+endpoint:
+  url: "https://copilot.microsoft.com/"
+
+  browser:
+    engine: chromium
+    headless: false
+    navigation_wait: networkidle
+    navigation_timeout_ms: 30000
+
+  setup:
+    - { action: click, selector: "button:has-text('Get started')", optional: true }
+    - { action: click, selector: "button:has-text('Accept')", optional: true }
+    - { action: wait, selector: "textarea[placeholder*='Message Copilot'], div[contenteditable='true']", state: visible, timeout_ms: 20000 }
+
+  prompt:
+    inputs:
+      - selector: "textarea[placeholder*='Message Copilot']"
+        fallback_selectors:
+          - "div[contenteditable='true']"
+          - "textarea"
+        value: "{prompt}"
+        method: type
+        delay_ms: 5
+
+    submit:
+      method: click
+      selector: "button[aria-label='Submit message']"
+      fallback_selectors:
+        - "button[aria-label*='Send']"
+        - "button[type='submit']"
+
+    wait_for:
+      selector: "[data-content='ai-message']"
+      fallback_selectors:
+        - ".bot-message"
+        - "[role='log'] [data-author='ai']"
+      state: visible
+      timeout_ms: 60000
+      settle_ms: 2000
+
+    extract:
+      selector: "[data-content='ai-message']:last-of-type"
+      fallback_selectors:
+        - ".bot-message:last-of-type"
+      method: inner_text
+      pick: last
+
+    reset:
+      action: reload
+
+auth:
+  type: none

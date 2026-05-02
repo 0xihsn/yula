@@ -1,0 +1,57 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║          YULA AI Scanner — Target: Custom REST API                       ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Use this target type for any HTTP API that isn't OpenAI or Anthropic format.
+# Configure the body_template with a {prompt} placeholder — YULA AI Scanner
+# substitutes the attack payload there before sending each request.
+#
+# Usage: python run.py scan --target config/targets/custom_api_target.yaml
+#
+# Required environment variables (adjust based on your auth type):
+#   MY_API_TOKEN — Bearer token for your API
+
+type: custom_api
+
+endpoint:
+  # Your AI application's API endpoint
+  url: "http://localhost:9000/api/chat"
+
+  # HTTP method: GET | POST | PUT
+  method: POST
+
+  # JSON body template — MUST contain {prompt} as the substitution placeholder.
+  # YULA AI Scanner replaces {prompt} with each attack payload before sending.
+  # Use standard JSON format. The placeholder can appear anywhere in the body.
+  body_template: |
+    {
+      "message": "{prompt}",
+      "session_id": "yula-ai-scanner-security-test",
+      "stream": false,
+      "user_id": "test-user"
+    }
+
+  # Dot-notation path to extract the AI response text from the JSON response.
+  # Examples:
+  #   "response"           → response_body["response"]
+  #   "data.text"          → response_body["data"]["text"]
+  #   "choices.0.message"  → response_body["choices"][0]["message"]
+  #   "output.generated"   → response_body["output"]["generated"]
+  response_path: "response"
+
+  # Content-Type header for the request
+  content_type: "application/json"
+
+auth:
+  # Authentication type: api_key | bearer | basic | cookie | none
+  type: bearer
+
+  # Bearer token — loaded from environment variable
+  token: "${MY_API_TOKEN}"
+
+options:
+  # Additional HTTP headers to include in every request
+  extra_headers:
+    X-App-Version: "1.0"
+    X-Client-ID: "yula-ai-scanner"
+    X-Request-Source: "security-testing"

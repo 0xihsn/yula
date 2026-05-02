@@ -1,0 +1,36 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: Perplexity AI                                ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Perplexity AI offers online models with real-time web search and        ║
+# ║  reasoning capabilities via an OpenAI-compatible API.                    ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Get your API key at: https://www.perplexity.ai/settings/api
+#
+# Usage: python run.py scan --target config/targets/perplexity_target.yaml
+#
+# Required environment variables:
+#   PERPLEXITY_API_KEY — Your Perplexity API key (starts with pplx-...)
+
+type: openai
+
+endpoint:
+  url: "https://api.perplexity.ai/chat/completions"
+
+  # Available models:
+  #   sonar-pro (most capable, web search), sonar (fast, web search)
+  #   sonar-reasoning-pro, sonar-reasoning
+  #   r1-1776 (offline reasoning, no web search)
+  model: "sonar-pro"
+
+  # Optional: inject a system prompt to test your deployed AI application
+  system_prompt: null
+
+auth:
+  type: api_key
+  api_key: "${PERPLEXITY_API_KEY}"
+
+options:
+  max_tokens: 1024
+  temperature: 0.7
+  extra_headers: {}

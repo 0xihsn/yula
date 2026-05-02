@@ -1,0 +1,41 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: Databricks Foundation Model APIs  ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Databricks Foundation Model serving endpoints implement the OpenAI      ║
+# ║  /v1/chat/completions schema. Each workspace has its own URL.            ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Generate a personal access token at:
+#   <workspace>/settings/user/developer/access-tokens
+#
+# Usage: python run.py scan --target config/targets/databricks_target.yaml
+#
+# Required environment variables:
+#   DATABRICKS_HOST   — Your workspace host (e.g. https://dbc-xxxxxxx.cloud.databricks.com)
+#   DATABRICKS_TOKEN  — Your Databricks personal access token (starts with dapi...)
+#
+# NOTE: replace <model-endpoint-name> in the URL below with the name of the
+# serving endpoint you created in the Databricks UI (Serving → Endpoints).
+
+type: openai
+
+endpoint:
+  # The URL pattern is:
+  #   ${DATABRICKS_HOST}/serving-endpoints/<endpoint-name>/invocations
+  url: "${DATABRICKS_HOST}/serving-endpoints/databricks-meta-llama-3-3-70b-instruct/invocations"
+
+  # When using Databricks-hosted foundation models, the `model` field is
+  # ignored by the endpoint (the URL identifies the model), but the OpenAI
+  # client requires a non-empty value.
+  model: "databricks-meta-llama-3-3-70b-instruct"
+
+  system_prompt: null
+
+auth:
+  type: bearer
+  token: "${DATABRICKS_TOKEN}"
+
+options:
+  max_tokens: 1024
+  temperature: 0.7
+  extra_headers: {}

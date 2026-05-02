@@ -1,0 +1,54 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: Gandalf (Lakera CTF)              ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Real-world example targeting a public CTF. Uses the SHORTHAND style
+# (flat input_field / submit_button / response_container fields) which is
+# enough for simple single-input chat UIs. For multi-step flows, hidden
+# fields, or custom waits/extraction, see `config/targets/webpage_target.yaml`
+# for the full step-based `prompt:` block.
+#
+# Prerequisites:
+#   pip install playwright
+#   playwright install chromium
+#
+# Usage: python run.py scan --target config/targets/gandalf.lakera.yaml
+#
+# To debug: set headless: false to watch the browser interact with your page.
+
+type: webpage
+
+endpoint:
+  # URL of the AI chat page to test
+  url: "https://gandalf.lakera.ai/do-not-tell"
+
+  # Browser engine: chromium | firefox | webkit
+  browser: chromium
+
+  # Run in headless mode (true = no visible window)
+  # Set to false to watch the automation and debug selector issues
+  headless: true
+
+  # CSS selector for the text input field where prompts are entered
+  input_field: "#comment"
+
+  # CSS selector for the send/submit button.
+  # Set to null to press Enter instead of clicking a button.
+  submit_button: null
+
+  # CSS selector for the element containing the AI's response.
+  # YULA AI Scanner extracts the text content of this element after each prompt.
+  # Tip: use ":last-child" or similar to target the most recent message.
+  response_container: '#root > div > div.app.flex.min-h-screen.w-full.min-w-full.flex-col.gradients-background-mobile.xl\:gradients-background-default.bg-\[\#0e1012\] > div.first-page.first-page-padding.container.mx-auto.flex.w-full.max-w-\[596px\].flex-col.items-center.px-4.xl\:pt-\[54px\] > p.answer.whitespace-pre-line.text-\[14px\].xl\:text-\[16px\]'
+
+  # CSS selector for a clear/reset button to clean up between tests (optional).
+  # Set to null if your chat app doesn't have a clear button.
+  clear_button: null
+
+  # Maximum milliseconds to wait for the response to appear after submitting.
+  # Increase this for slow models or high-latency environments.
+  response_wait_ms: 8000
+
+auth:
+  # Gandalf is a public CTF — no authentication required.
+  type: none

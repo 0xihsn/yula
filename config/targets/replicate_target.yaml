@@ -1,0 +1,54 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: Replicate                         ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Replicate's predictions API is asynchronous: POST creates a prediction  ║
+# ║  and returns a polling URL; you wait for `status: succeeded`. The custom ║
+# ║  adapter supports a single round-trip only, so this YAML targets the     ║
+# ║  *synchronous* "Prefer: wait" mode that returns the result inline.       ║
+# ║                                                                          ║
+# ║  For long-running models (>60s) use the openai-compatible endpoint at    ║
+# ║  https://openai-proxy.replicate.com/v1 with a copy of openai_target.yaml.║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Get your API token at: https://replicate.com/account/api-tokens
+#
+# Usage: python run.py scan --target config/targets/replicate_target.yaml
+#
+# Required environment variables:
+#   REPLICATE_API_TOKEN — Your Replicate API token (starts with r8_...)
+
+type: custom_api
+
+endpoint:
+  # Replace <owner>/<model> in the URL with the model you want to test.
+  # The "Prefer: wait" header tells Replicate to block until the prediction
+  # finishes (max ~60s) and return the output inline.
+  url: "https://api.replicate.com/v1/models/meta/meta-llama-3-70b-instruct/predictions"
+
+  method: POST
+
+  body_template: |
+    {
+      "input": {
+        "prompt": "{prompt}",
+        "max_tokens": 512,
+        "temperature": 0.7
+      }
+    }
+
+  # Replicate text models stream their output as a list of strings; we read
+  # the first element (the joined response). For models that return a single
+  # string, change to "output".
+  response_path: "output"
+
+  content_type: "application/json"
+
+  extra_headers:
+    Prefer: "wait"
+
+auth:
+  type: bearer
+  token: "${REPLICATE_API_TOKEN}"
+
+options:
+  extra_headers: {}

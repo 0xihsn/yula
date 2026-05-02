@@ -1,0 +1,37 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: vLLM (Local / Self-Hosted)                   ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  vLLM is a high-throughput inference engine that exposes an              ║
+# ║  OpenAI-compatible API. Used for self-hosted model deployments.          ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Prerequisites:
+#   pip install vllm
+#   python -m vllm.entrypoints.openai.api_server \
+#     --model meta-llama/Llama-3.2-8B-Instruct \
+#     --api-key token-abc123
+#
+# Usage: python run.py scan --target config/targets/vllm_target.yaml
+#
+# Required environment variables:
+#   VLLM_API_KEY — The API key passed to vLLM via --api-key (or "EMPTY" if none)
+
+type: openai
+
+endpoint:
+  url: "http://localhost:8000/v1/chat/completions"
+
+  # Model name as passed to vLLM's --model argument
+  model: "meta-llama/Llama-3.2-8B-Instruct"
+
+  # Optional: inject a system prompt to test your deployed application
+  system_prompt: null
+
+auth:
+  type: api_key
+  api_key: "${VLLM_API_KEY}"
+
+options:
+  max_tokens: 1024
+  temperature: 0.7
+  extra_headers: {}

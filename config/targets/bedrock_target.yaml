@@ -1,0 +1,51 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: AWS Bedrock (via proxy)           ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  AWS Bedrock's native InvokeModel API requires SigV4 request signing,    ║
+# ║  which YULA does NOT do natively (no boto3 dependency).                  ║
+# ║                                                                          ║
+# ║  Recommended approach: run an OpenAI-compatible proxy in front of        ║
+# ║  Bedrock and point a copy of openai_target.yaml at the proxy. Two        ║
+# ║  well-known options:                                                     ║
+# ║                                                                          ║
+# ║   1. AWS-published Bedrock Access Gateway                                ║
+# ║      https://github.com/aws-samples/bedrock-access-gateway              ║
+# ║      → Lambda + API Gateway. Exposes /api/v1/chat/completions.           ║
+# ║                                                                          ║
+# ║   2. LiteLLM Proxy (open-source, multi-provider)                         ║
+# ║      https://docs.litellm.ai/docs/proxy/quick_start                     ║
+# ║      → Single binary; configure Bedrock as a provider.                   ║
+# ║                                                                          ║
+# ║  Once a proxy is running locally or in your VPC, prefer the OpenAI       ║
+# ║  target type — it's faster, simpler, and uses pooled connections.        ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# This file is a STUB documenting the recommended path. As a fallback, you
+# can point YULA at a presigned Bedrock URL via the custom_api adapter, but
+# the URL expires in seconds and isn't suited to multi-payload scans.
+#
+# Required environment variables (when using a proxy):
+#   BEDROCK_PROXY_URL — Your proxy's chat-completions URL
+#   BEDROCK_PROXY_KEY — The proxy's authentication token
+
+type: openai
+
+endpoint:
+  url: "${BEDROCK_PROXY_URL}"
+
+  # Bedrock model IDs as the proxy expects them — examples:
+  #   anthropic.claude-3-5-sonnet-20241022-v2:0
+  #   meta.llama3-3-70b-instruct-v1:0
+  #   amazon.nova-pro-v1:0
+  model: "anthropic.claude-3-5-sonnet-20241022-v2:0"
+
+  system_prompt: null
+
+auth:
+  type: api_key
+  api_key: "${BEDROCK_PROXY_KEY}"
+
+options:
+  max_tokens: 1024
+  temperature: 0.7
+  extra_headers: {}

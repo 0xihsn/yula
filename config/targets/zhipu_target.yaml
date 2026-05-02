@@ -1,0 +1,33 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: Zhipu AI (GLM)                    ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Zhipu's BigModel platform (智谱清言 / GLM) exposes GLM-4 family models   ║
+# ║  via an OpenAI-compatible /v4/chat/completions endpoint.                 ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Get your API key at: https://open.bigmodel.cn
+#
+# Usage: python run.py scan --target config/targets/zhipu_target.yaml
+#
+# Required environment variables:
+#   ZHIPU_API_KEY — Your Zhipu API key (the legacy "id.secret" form is also
+#                   accepted, but the newer single-token form is preferred)
+
+type: openai
+
+endpoint:
+  url: "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+
+  # Common models: glm-4-plus, glm-4-air, glm-4-flash, glm-4v-plus, glm-4-9b
+  model: "glm-4-plus"
+
+  system_prompt: null
+
+auth:
+  type: api_key
+  api_key: "${ZHIPU_API_KEY}"
+
+options:
+  max_tokens: 1024
+  temperature: 0.7
+  extra_headers: {}

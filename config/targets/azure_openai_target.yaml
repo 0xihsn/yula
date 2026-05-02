@@ -1,0 +1,39 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: Azure OpenAI Service                         ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Azure OpenAI Service deploys OpenAI models within Azure infrastructure. ║
+# ║  Uses the same API format as OpenAI but with a different URL structure.  ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Usage: python run.py scan --target config/targets/azure_openai_target.yaml
+#
+# Required environment variables:
+#   AZURE_OPENAI_KEY      — Your Azure OpenAI API key (from Azure portal)
+#
+# Required: Replace AZURE_RESOURCE_NAME and DEPLOYMENT_NAME in the URL below
+# with your actual Azure OpenAI resource name and deployment name.
+
+type: openai
+
+endpoint:
+  # Replace AZURE_RESOURCE_NAME with your Azure resource name
+  # Replace DEPLOYMENT_NAME with your deployment name (e.g., gpt-4o-deployment)
+  url: "https://AZURE_RESOURCE_NAME.openai.azure.com/openai/deployments/DEPLOYMENT_NAME/chat/completions?api-version=2024-08-01-preview"
+
+  # The model name for Azure OpenAI — should match your deployment
+  model: "gpt-4o"
+
+  # Optional: inject a system prompt to test your deployed AI application
+  system_prompt: null
+
+auth:
+  # Azure OpenAI uses api-key header instead of Authorization: Bearer
+  type: api_key
+  api_key: "${AZURE_OPENAI_KEY}"
+
+options:
+  max_tokens: 1024
+  temperature: 0.7
+  # Azure OpenAI requires the api-key header
+  extra_headers:
+    api-key: "${AZURE_OPENAI_KEY}"

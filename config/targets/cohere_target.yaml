@@ -1,0 +1,35 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: Cohere                                       ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Cohere's Command models via the v2 Chat API. Command R+ is optimized   ║
+# ║  for RAG, agentic tasks, and complex reasoning.                          ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Get your API key at: https://dashboard.cohere.com/api-keys
+#
+# Usage: python run.py scan --target config/targets/cohere_target.yaml
+#
+# Required environment variables:
+#   COHERE_API_KEY — Your Cohere API key (starts with ...)
+
+type: cohere
+
+endpoint:
+  url: "https://api.cohere.com/v2/chat"
+
+  # Available models:
+  #   command-r-plus-08-2024 (most capable)
+  #   command-r-08-2024 (balanced)
+  #   command-r (fast)
+  #   command-nightly (latest experimental)
+  model: "command-r-plus-08-2024"
+
+  # Optional: inject a system prompt to test your deployed AI application
+  system_prompt: null
+
+  # Maximum output tokens
+  max_tokens: 1024
+
+auth:
+  type: api_key
+  api_key: "${COHERE_API_KEY}"

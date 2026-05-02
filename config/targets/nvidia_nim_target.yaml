@@ -1,0 +1,37 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: NVIDIA NIM (build.nvidia.com)     ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  NVIDIA's hosted NIM endpoints expose dozens of open-weight and          ║
+# ║  partner models through a single OpenAI-compatible API surface.          ║
+# ║                                                                          ║
+# ║  Self-hosted NIMs (on a GPU node) expose the same /v1/chat/completions   ║
+# ║  shape — point `url` at your local container instead.                    ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Get your API key at: https://build.nvidia.com
+#
+# Usage: python run.py scan --target config/targets/nvidia_nim_target.yaml
+#
+# Required environment variables:
+#   NVIDIA_API_KEY — Your NVIDIA NIM API key (starts with nvapi-...)
+
+type: openai
+
+endpoint:
+  url: "https://integrate.api.nvidia.com/v1/chat/completions"
+
+  # Browse models at https://build.nvidia.com/models
+  # Examples: meta/llama-3.3-70b-instruct, mistralai/mixtral-8x22b-instruct-v0.1,
+  #           nvidia/llama-3.1-nemotron-70b-instruct
+  model: "meta/llama-3.3-70b-instruct"
+
+  system_prompt: null
+
+auth:
+  type: api_key
+  api_key: "${NVIDIA_API_KEY}"
+
+options:
+  max_tokens: 1024
+  temperature: 0.7
+  extra_headers: {}

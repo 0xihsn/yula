@@ -1,0 +1,41 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: AI21 Labs (Jamba)                 ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  AI21's Studio API serves Jamba-family models. The chat endpoint takes   ║
+# ║  the OpenAI messages shape and returns choices[0].message.content.       ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Get your API key at: https://studio.ai21.com/account/api-key
+#
+# Usage: python run.py scan --target config/targets/ai21_target.yaml
+#
+# Required environment variables:
+#   AI21_API_KEY — Your AI21 Studio API key
+
+type: custom_api
+
+endpoint:
+  url: "https://api.ai21.com/studio/v1/chat/completions"
+
+  method: POST
+
+  body_template: |
+    {
+      "model": "jamba-1.5-large",
+      "messages": [
+        {"role": "user", "content": "{prompt}"}
+      ],
+      "max_tokens": 512,
+      "temperature": 0.7
+    }
+
+  response_path: "choices.0.message.content"
+
+  content_type: "application/json"
+
+auth:
+  type: bearer
+  token: "${AI21_API_KEY}"
+
+options:
+  extra_headers: {}

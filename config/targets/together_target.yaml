@@ -1,0 +1,36 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: Together AI                                  ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Together AI hosts 200+ open-source models with an OpenAI-compatible    ║
+# ║  API. Great for testing a wide range of base and instruction models.     ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Get your API key at: https://api.together.ai
+#
+# Usage: python run.py scan --target config/targets/together_target.yaml
+#
+# Required environment variables:
+#   TOGETHER_API_KEY — Your Together AI API key
+
+type: openai
+
+endpoint:
+  url: "https://api.together.xyz/v1/chat/completions"
+
+  # Browse available models at: https://api.together.ai/models
+  # Examples: meta-llama/Llama-3.3-70B-Instruct-Turbo,
+  #           mistralai/Mixtral-8x22B-Instruct-v0.1,
+  #           Qwen/Qwen2.5-72B-Instruct-Turbo
+  model: "meta-llama/Llama-3.3-70B-Instruct-Turbo"
+
+  # Optional: inject a system prompt to test your deployed AI application
+  system_prompt: null
+
+auth:
+  type: api_key
+  api_key: "${TOGETHER_API_KEY}"
+
+options:
+  max_tokens: 1024
+  temperature: 0.7
+  extra_headers: {}

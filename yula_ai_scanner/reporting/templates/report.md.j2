@@ -1,0 +1,152 @@
+{# YULA AI Scanner Security Report — Jinja2 Template
+   Visibility gating:
+     - PUBLIC:       executive summary + severity breakdown only
+     - INTERNAL:     + findings with signals and recommendations
+     - CONFIDENTIAL: + full payloads and full AI responses
+#}
+# YULA AI Scanner — AI Security Report
+
+**Scan ID:** `{{ report.scan_id }}`
+**Generated:** {{ report.timestamp.strftime('%Y-%m-%d %H:%M:%S UTC') }}
+**Target:** `{{ report.target_url }}`
+**Target Type:** {{ report.target_type }}
+**Authentication:** {{ report.auth_type }}
+**Visibility Level:** `{{ report.visibility.value.upper() }}`
+
+---
+
+## Executive Summary
+
+| Metric | Value |
+|--------|-------|
+| Total Tests Run | {{ report.total_tests }} |
+| Vulnerabilities Found | **{{ report.vulnerable_count }}** |
+| Safe Results | {{ report.safe_count }} |
+| Errors / Timeouts | {{ report.error_count }} |
+| Pass Rate | {{ "%.1f"|format(report.pass_rate * 100) }}% |
+| Scan Duration | {{ "%.1f"|format(report.duration_seconds) }}s |
+| Avg Response Time | {{ "%.0f"|format(report.avg_duration_ms) }}ms |
+
+### Severity Breakdown
+
+| Severity | Count |
+|----------|-------|
+| {{ severity_bar('CRITICAL') }} | {{ report.severity_counts.CRITICAL }} |
+| {{ severity_bar('HIGH') }} | {{ report.severity_counts.HIGH }} |
+| {{ severity_bar('MEDIUM') }} | {{ report.severity_counts.MEDIUM }} |
+| {{ severity_bar('LOW') }} | {{ report.severity_counts.LOW }} |
+| {{ severity_bar('INFO') }} | {{ report.severity_counts.INFO }} |
+| {{ severity_bar('SAFE') }} | {{ report.severity_counts.SAFE }} |
+
+```
+Risk Overview:
+{% for severity, count in report.severity_counts.items() %}{% if count > 0 %}{{ "%-10s"|format(severity) }} {{ "█" * [count, 40]|min }}{{ " " + count|string if count > 0 else "" }}
+{% endif %}{% endfor %}
+```
+
+{% if report.verdicts %}
+---
+
+## Template Verdicts
+
+**Vulnerable: {{ report.template_vulnerable_count }} templates / {{ report.template_total_count }} tested**
+*One row per attack template. A template is "vulnerable" if any of its variants — or any turn of a sequential chain — elicited a vulnerable response.*
+
+| Status | Severity | Template | Best Conf. | Hits |
+|--------|----------|----------|-----------|------|
+{% for v in report.verdicts %}
+| {{ v.status|upper }} | {{ severity_bar(v.severity) }} | `{{ v.template_id }}`{% if v.template_name %} — {{ v.template_name }}{% endif %} | {{ "%.0f"|format(v.best_confidence * 100) }}% | {{ v.vulnerable_count }}/{{ v.payload_count }} |
+{% endfor %}
+
+{% endif %}
+---
+
+{% if report.vulnerable_count > 0 %}
+## Findings
+
+*Sorted by severity (CRITICAL → INFO).*
+
+{% for finding in report.findings %}
+### {{ finding.intent_title }}{% if finding.technique_title %} via {{ finding.technique_title }}{% endif %}{% if finding.evasion_title %} + {{ finding.evasion_title }} Evasion{% endif %}
+
+
+{{ severity_bar(finding.severity, finding.score) }}
+
+**Confidence:** {{ "%.0f"|format(finding.confidence * 100) }}%
+| **Intent:** `{{ finding.intent_id }}`
+{% if finding.template_id %}| **Template:** `{{ finding.template_id }}`{% if finding.template_name %} — {{ finding.template_name }}{% endif %}
+{% endif %}{% if finding.technique_id %}| **Technique:** `{{ finding.technique_id }}`
+{% endif %}{% if finding.evasion_id %}| **Evasion:** `{{ finding.evasion_id }}`
+{% endif %}| **Response Time:** {{ "%.0f"|format(finding.duration_ms) }}ms
+{% if finding.http_status %}| **HTTP Status:** {{ finding.http_status }}{% endif %}
+
+**Input (Attack Payload):**
+
+```
+{{ finding.prompt }}
+```
+
+**Output (AI Response):**
+
+```
+{{ finding.response if finding.response else "(no response)" }}
+```
+
+{% if report.visibility.value in ('internal', 'confidential', 'debug') %}
+**Matched Detection Signals:**
+{% for sig in finding.matched_signals %}
+- `{{ sig }}`
+{% endfor %}
+
+**Recommendation:** {{ finding.recommendation }}
+
+{% endif %}
+---
+
+{% endfor %}
+{% else %}
+## Findings
+
+No vulnerabilities were detected in this scan. All {{ report.total_tests }} test payloads
+were handled safely by the target AI system.
+
+{% endif %}
+
+{% if report.visibility.value in ('internal', 'confidential', 'debug') %}
+## Recommendations
+
+{% if report.recommendations %}
+{% for i, rec in enumerate(report.recommendations, 1) %}
+{{ i }}. **[{{ rec.severity }}]** {{ rec.text }}
+{% endfor %}
+{% else %}
+No specific remediation required — the AI system appears to handle these attack
+categories safely.
+{% endif %}
+
+---
+{% endif %}
+
+## Methodology
+
+This scan used the **YULA AI Scanner Taxonomy** — a comprehensive framework for
+prompt injection and adversarial AI security testing.
+
+| Dimension | Count Tested |
+|-----------|-------------|
+| Attack Intents | {{ report.intents_tested }} |
+| Attack Techniques | {{ report.techniques_tested }} |
+| Evasion Methods | {{ report.evasions_tested }} |
+| **Total Payloads** | **{{ report.total_tests }}** |
+
+**Attack Categories Tested:**
+{% for intent in report.intents_list %}
+- {{ intent }}
+{% endfor %}
+
+---
+
+## About YULA AI Scanner
+
+*Report generated by **YULA AI Scanner** — AI Security Testing CLI*
+*Created by ihsan bilkay (0xIHSN)*

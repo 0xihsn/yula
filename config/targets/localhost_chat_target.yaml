@@ -1,0 +1,27 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║          YULA AI Scanner — Target: localhost:8000/chat                   ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Equivalent curl:
+#   curl -X POST http://localhost:8000/chat \
+#     -H "Content-Type: application/json" \
+#     -d '{"message": "Hello, how can you help me?"}'
+#
+# Usage: python run.py scan --target config/targets/localhost_chat_target.yaml
+
+type: custom_api
+
+endpoint:
+  url: "http://localhost:8000/chat"
+  method: POST
+  body_template: |
+    {
+      "message": "{prompt}"
+    }
+  # Adjust to match your API's actual response shape
+  # (e.g. "data.text", "choices.0.message")
+  response_path: "response"
+  content_type: "application/json"
+
+auth:
+  type: none

@@ -1,0 +1,149 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║          YULA AI Scanner — Target: Web Page with Chat Input              ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# YULA AI Scanner drives a real browser via Playwright. The webpage target
+# supports two equivalent styles — pick whichever matches your UI:
+#
+#   1. SHORTHAND  — flat selectors (input_field / submit_button / ...).
+#                   Best for simple chat UIs with one input + one response area.
+#                   See the bottom of this file for the shorthand block.
+#
+#   2. FLOW       — step-based `prompt:` + optional `setup:` + `browser:` blocks.
+#                   Use when you need: multi-step setup, CSRF token extraction,
+#                   multiple input fields, fallback selectors, custom waits,
+#                   custom extraction (HTML, attribute, JS evaluation, regex).
+#
+# Mixing styles in one file is rejected with a clear error.
+#
+# Prerequisites:
+#   pip install playwright
+#   playwright install chromium
+#
+# Usage: python run.py scan --target config/targets/webpage_target.yaml
+#
+# Finding selectors: open DevTools (F12), inspect the element, right-click →
+# Copy → Copy selector. Playwright accepts CSS, XPath (`xpath=//div[...]`),
+# and text (`text=Hello`) — see https://playwright.dev/docs/locators.
+#
+# To debug: set browser.headless to false to watch the automation run.
+
+type: webpage
+
+endpoint:
+  # URL of the AI chat page to test (always required).
+  url: "http://localhost:3000/chat"
+
+  # ─── Browser block (optional) ────────────────────────────────────────────
+  # All fields have sensible defaults; uncomment only what you need.
+  browser:
+    engine: chromium                     # chromium | firefox | webkit
+    headless: true                       # set false to watch the browser
+    # viewport: { width: 1280, height: 800 }
+    # user_agent: "Mozilla/5.0 (compatible; YulaScanner/1.0)"
+    # extra_http_headers:
+    #   X-Test-Run: "yula"
+    navigation_wait: networkidle         # networkidle | load | domcontentloaded
+    navigation_timeout_ms: 15000
+
+  # ─── Setup steps (optional, run once after navigation + auth) ────────────
+  # Use these to: dismiss cookie banners, click "Start chat", extract CSRF
+  # tokens, wait for SPA hydration, etc. Each step is one Playwright action.
+  setup:
+    # Wait until the chat UI is ready.
+    - { action: wait, selector: "#chat-input", state: visible, timeout_ms: 10000 }
+    # Dismiss an optional cookie banner if it shows up.
+    - { action: click, selector: "button.accept-cookies", optional: true }
+    # Capture a CSRF token for later use as `{csrf}` in prompt steps.
+    # - { action: extract, selector: "input[name=csrf]",
+    #     extract_method: attribute, attribute: value, store_as: csrf }
+
+  # ─── Per-prompt cycle (runs once per attack payload) ─────────────────────
+  prompt:
+    # Optional pre-prompt steps (per send) — e.g. click "New chat".
+    before: []
+    # before:
+    #   - { action: click, selector: "#new-chat", optional: true }
+
+    # One or more fields to populate. {prompt} = current attack payload.
+    # {var_name} = anything captured by an earlier `extract` step.
+    inputs:
+      - selector: "#chat-input"
+        value: "{prompt}"
+        method: fill                     # fill | type | press_sequentially
+        # delay_ms: 20                   # only for method=type / press_sequentially
+        # fallback_selectors: ["textarea[name=message]"]
+
+    # How to submit the populated form.
+    submit:
+      method: click                      # click | press_enter | press_key
+      selector: "#send-btn"
+      # key: "Enter"                     # only for method=press_key
+      # fallback_selectors: ["button[type=submit]"]
+
+    # How to wait for the response to be ready.
+    wait_for:
+      selector: ".message.assistant"
+      state: visible                     # visible | hidden | attached | text | networkidle
+      # contains: "Assistant:"           # required when state=text
+      timeout_ms: 8000
+      settle_ms: 500                     # extra dwell so streaming finishes
+
+    # How to read the response off the page.
+    extract:
+      # selector: ".message.assistant"   # defaults to wait_for.selector
+      method: inner_text                 # inner_text | text_content | inner_html | attribute | evaluate
+      # attribute: "data-content"        # required for method=attribute
+      # script: "el => el.innerText"     # required for method=evaluate
+      pick: last                         # first | last | all
+      # regex: "Assistant:\\s*(.*)"       # optional post-extract regex
+      # regex_group: 1
+
+    # How to reset state between attack payloads.
+    reset:
+      action: none                       # none | click | reload
+      # selector: ".clear-chat"          # required when action=click
+
+# ─── Authentication ──────────────────────────────────────────────────────────
+auth:
+  # Option 1 — Cookie-based (existing session token).
+  type: cookie
+  cookies:
+    - name: "session_token"
+      value: "${SESSION_TOKEN}"          # resolved from environment
+      domain: "localhost"
+      path: "/"
+      secure: false
+
+  # Option 2 — Form login (single username/password page). For richer login
+  # flows (MFA, hidden CSRF, multi-page), prefer `endpoint.setup` steps.
+  #
+  # type: form_login
+  # login_url: "http://localhost:3000/login"
+  # username_selector: "#email"
+  # password_selector: "#password"
+  # submit_selector: "button[type=submit]"
+  # username: "${APP_USERNAME}"
+  # password: "${APP_PASSWORD}"
+  # post_login_wait_ms: 3000
+
+  # Option 3 — No authentication.
+  # type: none
+
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║  SHORTHAND alternative (mutually exclusive with `prompt:` above)         ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# If your chat UI is simple (one input, one response container, optional
+# clear button), you can skip the `prompt:` block entirely and use these
+# flat fields under `endpoint:` instead. Do NOT combine both styles.
+#
+# endpoint:
+#   url: "http://localhost:3000/chat"
+#   browser: chromium                  # also accepts the BrowserConfig object form
+#   headless: true
+#   input_field: "#chat-input"
+#   submit_button: "#send-btn"         # null → press Enter
+#   response_container: ".message.assistant:last-child"
+#   clear_button: null                 # null → no reset between tests
+#   response_wait_ms: 8000

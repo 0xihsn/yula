@@ -1,0 +1,32 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: DeepSeek                          ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  DeepSeek's API is fully OpenAI-compatible. Models include the V3 chat   ║
+# ║  series and the R1 reasoning series.                                     ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Get your API key at: https://platform.deepseek.com
+#
+# Usage: python run.py scan --target config/targets/deepseek_target.yaml
+#
+# Required environment variables:
+#   DEEPSEEK_API_KEY — Your DeepSeek API key (starts with sk-...)
+
+type: openai
+
+endpoint:
+  url: "https://api.deepseek.com/chat/completions"
+
+  # Available models: deepseek-chat (V3), deepseek-reasoner (R1).
+  model: "deepseek-chat"
+
+  system_prompt: null
+
+auth:
+  type: api_key
+  api_key: "${DEEPSEEK_API_KEY}"
+
+options:
+  max_tokens: 1024
+  temperature: 0.7
+  extra_headers: {}

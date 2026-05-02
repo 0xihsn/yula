@@ -1,0 +1,32 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║              YULA AI Scanner — Target: Meta Llama API                    ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Meta's hosted Llama API ships an OpenAI-compatible "compat" endpoint.   ║
+# ║  This is distinct from the third-party llama-api.com gateway.            ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Apply for access / fetch credentials at: https://llama.developer.meta.com
+#
+# Usage: python run.py scan --target config/targets/llama_api_target.yaml
+#
+# Required environment variables:
+#   LLAMA_API_KEY — Your Meta Llama API key (starts with LLM|...)
+
+type: openai
+
+endpoint:
+  url: "https://api.llama.com/compat/v1/chat/completions"
+
+  # Examples: Llama-3.3-70B-Instruct, Llama-3.3-8B-Instruct, Llama-4-Scout-17B-16E
+  model: "Llama-3.3-70B-Instruct"
+
+  system_prompt: null
+
+auth:
+  type: api_key
+  api_key: "${LLAMA_API_KEY}"
+
+options:
+  max_tokens: 1024
+  temperature: 0.7
+  extra_headers: {}
